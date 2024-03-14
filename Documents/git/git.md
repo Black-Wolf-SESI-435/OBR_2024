@@ -5,7 +5,7 @@
 Git é uma ferramenta de linha de comando (terminal) para organizar as versões do seu código.
 Por exemplo, ao invés de duplicarmos os arduivos:
 
-![arquivos_duplicados](arquivos_duplicados.png)
+![arquivos_duplicados](images/arquivos_duplicados.png)
 
 O que é estramemente ineficiente, além de precisar ser feito manualmente está sujeita a muitos erros humanos.
 
@@ -15,7 +15,7 @@ Git pode parecer difícil de começar a usar, mas decorando 7 comandos é possiv
 
 O Git é um programa que procura pelos arquivos dentro do diretório do seu projeto e detecta quando ele é modificado. Usando os comandos do git ele salva um 'patch' que é um arquivo que descrve as modificações do arquivo, um patch se parece com isso:
 
-![patch](exemplo_patch.png)
+![patch](images/exemplo_patch.png)
 
 As linhas que começam com um `-` representa uma linha excluida e as linhas que começam com `+` representam linhas adicionadas. Uma linha que seja modificada apareceria como excluida e sua modificação adicionada. Por exemplo, corrigimos o texto `2 + 2 = 5`.
 
@@ -27,7 +27,7 @@ As linhas que começam com um `-` representa uma linha excluida e as linhas que 
 Apenas esse patch é salvo pelo git e não uma cópia inteira do arquivo, assim aproveitando melhor a memória.
 Esse patch é salvo em um ´commit´, commits são um conjunto de modificações, commits carregam um patch e uma mensagem que descreve a modificação, por exemplo:
 
-![commit](exemplo_commit.png)
+![commit](images/exemplo_commit.png)
 
 A mensagem do commit é `Correção dos pinos` e o patch é:
 
@@ -50,7 +50,7 @@ Nota, para copiar e colar textos dentro do terminal clique com o botão direito 
 
 Primeiro, vamos cirar um diretório para o projeto, esse diretório é apenas uma pasta contendo uma pasta oculta `.git` dentro. Esse diretório é chamado de repositório. Para isso vamos usar o comando: `git init <nome do diretório>`.
 
-![git_init](git_init.png)
+![git_init](images/git_init.png)
 
 Para movermos para dentro do repositório usamos o comando `cd` para change directory, basta digitar `cd OBR` e apertar enter.
 Note que o git bash mostrará `~/OBR (master)`, o caracter '~' é um atalho para a sua pasta de usuário `C:\Users\<nome>` e `(master)` é o branch principal.
@@ -85,7 +85,7 @@ Agora vamos aprender um pouco do git do dia a dia:
 Criamos um novo arquivo, então o git ja deve tê-lo detectado.
 Vamos usar o comando `git status` para visualizar os arquivos criados e modificados.
 
-![git_status](git_status.png)
+![git_status](images/git_status.png)
 
 Oberve que a basta segue_linha aparece com cor vermelha e a mensagem abaixo diz que existem arquivos `untracked` não rastreados, arquivos serão adicionados ao git mesmo vazios, mas apenas se forem rastreados, isso permite ter arquivos não registrados no git dentro do seu repositório, voltaremos a esse tópico mais para frente.
 Vamos fazer nosso primeiro commit, para isso precisamos adicionar os arquivos que vamos commit ao stage (pode ser traduzido como estacionamento), arquivos em stage terão suas modificações adicionadas ao commit a aparecerão como verdes ao executar `git status`.
@@ -115,7 +115,7 @@ Finalmente vamos fazer um commit, ou não. Use o comando `git commit -m "<mensag
 git commit -m "Comaçando o projeto."
 ```
 
-![commit_erro](commit_erro.png)
+![commit_erro](images/commit_erro.png)
 
 O git exige que você registre um nome e um email para registrar o autor do commit, basta seguirmos as instruções que o git nos dá:
 
