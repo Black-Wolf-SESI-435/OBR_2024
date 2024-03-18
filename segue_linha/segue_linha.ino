@@ -1,62 +1,41 @@
-#define m1_enable 13
-#define m1_amarelo 12
-#define m1_verde 11
+#define sd_input A0
+#define se_input A1
 
-#define m2_amarelo 10
-#define m2_verde 9
-#define m2_enable 6
+// Funções da ponte h
+extern void m1_ligar(int vel);
+extern void m2_ligar(int vel);
 
-#define s1_input A0
-#define s2_input A1
+int vel_e = 180;
+int vel_d = 180;
 
+int erro_0 = 0;
+unsigned long erro_total = 0;
+unsigned long tempo_0 = 0;
+unsigned long tempo = 0;
+int pid(int erro, int kp, int kd, int ki) {
+  tempo = micros();
 
-/* Essa função liga o motor 1 controlado pelo IN_1, IN_2, EN_A
- *
- * @param vel int entre -100 e 100, representa a porcentagem
- * da velocidade onde -100 é a velocidade maxima de ré e 100
- * é a velocidade maxima de corrida
- */
-void m1_ligar(int vel) {
-  if (vel > 0) {
-    digitalWrite(m1_amarelo, HIGH);
-    digitalWrite(m1_verde, LOW);
-  } else if (vel < 0) {
-    digitalWrite(m1_amarelo, LOW);
-    digitalWrite(m1_verde, HIGH);
-  } else {
-    digitalWrite(m1_amarelo, LOW);
-    digitalWrite(m1_verde, LOW);
-  }
-  analogWrite(m1_enable, map(vel >= 0 ? vel : -vel, 0, 100, 0, 255));
-}
+  unsigned long delta_tempo = tempo - tempo_0;
+  int delta_erro = erro - erro_0;
 
-/* Essa função liga o motor 2 controlado pelo IN_3, IN_4 e EN_B
- *
- * @param vel int entre -100 e 100, representa a porcentagem
- *  da velocidade onde -100 é a velocidade maxima de ré e 100
- *  é a velocidade maxima de corrida
- */
-void m2_ligar(int vel) {
-  if (vel > 0) {
-    digitalWrite(m2_amarelo, HIGH);
-    digitalWrite(m2_verde, LOW);
-  } else if (vel < 0) {
-    digitalWrite(m2_amarelo, LOW);
-    digitalWrite(m2_verde, HIGH);
-  } else {
-    digitalWrite(m2_amarelo, LOW);
-    digitalWrite(m2_verde, LOW);
-  }
-  analogWrite(m1_enable, map(vel >= 0 ? vel : -vel, 0, 100, 0, 255));
+  erro_total += erro;
+
+  int val_pid = kp*erro + kd*delta_erro/delta_tempo + ki*(erro_total)*tempo;
+
+  erro_0 = erro;
+  tempo_0 = tempo;
+  return val_pid;
 }
 
 void setup() {
   // Coloca os pinos 9 a 13 e o 6 como OUTPUT
   Serial.begin(9600);
+
   int pins[6] = { 13, 12, 11, 10, 9, 6 };
-  for (int i = 0; i < 6; ++i) {
+  for (int i = 0; i < 6; ++i)
     pinMode(pins[i], OUTPUT);
-  }
+
+  // Liga os motores para frente
   digitalWrite(m1_amarelo, HIGH);
   digitalWrite(m1_verde, LOW);
   digitalWrite(m2_amarelo, HIGH);
@@ -65,16 +44,28 @@ void setup() {
 
 void loop() {
   // Lê o valor dos sensores
-  int s1_leitura = analogRead(s1_input);
-  int s2_leitura = analogRead(s2_input);
+  int val_sd = analogRead(sd_input);
+  int val_se = analogRead(se_input);
 
-  Serial.println(s1_leitura);
-  s1_seguir(s1_leitura);
-  // Liga os dois motores
+  int erro = val_se - val_sd;
+  //                 kp kd ki
+  int acc = pid(erro, 1, 3, 0);
+  unsigned long delta_tempo = tempo - tempo_0;
+  vel_e -= acc * delta_tempo;
+  vel_d += acc * delta_tempo;
 
-  /* Segue Linha: ...
-	 * use m1_ligar e m2_ligar para ligar e desligar os motores de acordo com a velocidade de -100% a 100%.
-	*/
+  if (vel_e < -100)
+    vel_e = -100;
+  else (vel_e > 100)
+    vel_e = 100;
+  
+  if (vel_d < -100)
+    vel_d = -100;
+  else (vel_d > 100)
+    vel_d = 100;
+
+  m1_ligar(vel_e);
+  m2_ligar(vel_d);
 }
 
 void s1_seguir(int cor) {
