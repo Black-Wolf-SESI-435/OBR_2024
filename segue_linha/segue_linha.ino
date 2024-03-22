@@ -47,7 +47,7 @@ void me_ligar(int vel) {
     digitalWrite(me_amarelo, LOW);
     digitalWrite(me_verde, LOW);
   }
-  analogWrite(md_enable, map(vel >= 0 ? vel : -vel, 0, 100, 0, 255));
+  analogWrite(me_enable, map(vel >= 0 ? vel : -vel, 0, 100, 0, 255));
 }
 
 void setup() {
