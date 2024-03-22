@@ -1,79 +1,94 @@
+#define md_enable 13
+#define md_amarelo 12
+#define md_verde 11
+
+#define me_amarelo 10
+#define me_verde 9
+#define me_enable 6
+
 #define sd_input A0
-#define se_input A1
+#define se_input A2
 
-// Funções da ponte h
-extern void m1_ligar(int vel);
-extern void m2_ligar(int vel);
 
-int vel_e = 180;
-int vel_d = 180;
+/* Essa função liga o motor 1 controlado pelo IN_1, IN_2, EN_A
+ *
+ * @param vel int entre -100 e 100, representa a porcentagem
+ * da velocidade onde -100 é a velocidade maxima de ré e 100
+ * é a velocidade maxima de corrida
+ */
+void md_ligar(int vel) {
+  if (vel > 0) {
+    digitalWrite(md_amarelo, HIGH);
+    digitalWrite(md_verde, LOW);
+  } else if (vel < 0) {
+    digitalWrite(md_amarelo, LOW);
+    digitalWrite(md_verde, HIGH);
+  } else {
+    digitalWrite(md_amarelo, LOW);
+    digitalWrite(md_verde, LOW);
+  }
+  analogWrite(md_enable, map(vel >= 0 ? vel : -vel, 0, 100, 0, 255));
+}
 
-int erro_0 = 0;
-unsigned long erro_total = 0;
-unsigned long tempo_0 = 0;
-unsigned long tempo = 0;
-int pid(int erro, int kp, int kd, int ki) {
-  tempo = micros();
-
-  unsigned long delta_tempo = tempo - tempo_0;
-  int delta_erro = erro - erro_0;
-
-  erro_total += erro;
-
-  int val_pid = kp*erro + kd*delta_erro/delta_tempo + ki*(erro_total)*tempo;
-
-  erro_0 = erro;
-  tempo_0 = tempo;
-  return val_pid;
+/* Essa função liga o motor 2 controlado pelo IN_3, IN_4 e EN_B
+ *
+ * @param vel int entre -100 e 100, representa a porcentagem
+ *  da velocidade onde -100 é a velocidade maxima de ré e 100
+ *  é a velocidade maxima de corrida
+ */
+void me_ligar(int vel) {
+  if (vel > 0) {    
+    digitalWrite(me_amarelo, HIGH);
+    digitalWrite(me_verde, LOW);
+  } else if (vel < 0) {
+    digitalWrite(me_amarelo, LOW);
+    digitalWrite(me_verde, HIGH);
+  } else {
+    digitalWrite(me_amarelo, LOW);
+    digitalWrite(me_verde, LOW);
+  }
+  analogWrite(md_enable, map(vel >= 0 ? vel : -vel, 0, 100, 0, 255));
 }
 
 void setup() {
-  // Coloca os pinos 9 a 13 e o 6 como OUTPUT
-  Serial.begin(9600);
-
-  int pins[6] = { 13, 12, 11, 10, 9, 6 };
-  for (int i = 0; i < 6; ++i)
-    pinMode(pins[i], OUTPUT);
-
-  // Liga os motores para frente
-  digitalWrite(m1_amarelo, HIGH);
-  digitalWrite(m1_verde, LOW);
-  digitalWrite(m2_amarelo, HIGH);
-  digitalWrite(m2_verde, LOW);
+    // Coloca os pinos 9 a 13 e o 6 como OUTPUT
+    int pins[6] = {13, 12, 11, 10, 9, 6 };
+    for (int i = 0; i < 6; ++i) {
+        pinMode(pins[i], OUTPUT);
+    }
 }
 
 void loop() {
-  // Lê o valor dos sensores
-  int val_sd = analogRead(sd_input);
-  int val_se = analogRead(se_input);
+    int calibragem = 85;
+    // Lê o valor dos sensores
+    int val_sd = analogRead(sd_input) > calibragem;
+    int val_se = analogRead(se_input) > calibragem;
+    // 13 branco 85 preto 200
 
-  int erro = val_se - val_sd;
-  //                 kp kd ki
-  int acc = pid(erro, 1, 3, 0);
-  unsigned long delta_tempo = tempo - tempo_0;
-  vel_e -= acc * delta_tempo;
-  vel_d += acc * delta_tempo;
-
-  if (vel_e < -100)
-    vel_e = -100;
-  else (vel_e > 100)
-    vel_e = 100;
-  
-  if (vel_d < -100)
-    vel_d = -100;
-  else (vel_d > 100)
-    vel_d = 100;
-
-  m1_ligar(vel_e);
-  m2_ligar(vel_d);
-}
-
-void s1_seguir(int cor) {
-  if (cor <= 80) {
-    analogWrite(m1_enable, 255);
-    analogWrite(m2_enable, 180);
-  } else if (cor >= 81) {
-    analogWrite(m1_enable, 180);
-    analogWrite(m2_enable, 255);
-  }
+    if (val_se && val_sd) {
+        // preto x preto: frete
+        md_ligar(70);
+        me_ligar(70);
+    }
+    if (val_se && !val_sd) {
+        // preto x branco: tras, 0.4s, esquerda
+        md_ligar(-60);
+        me_ligar(-60);
+        delay(400);
+        md_ligar(70);
+        me_ligar(20);
+    }
+    if (!val_se && val_sd) {
+        // branco x preto: tras, 0.4s, direita
+        md_ligar(-60);
+        me_ligar(-60);
+        delay(400);
+        md_ligar(20);
+        me_ligar(70);
+    }
+    if (!val_sd && !val_se) {
+        // branco x branco: frete
+        md_ligar(70);
+        me_ligar(70);
+    }
 }
