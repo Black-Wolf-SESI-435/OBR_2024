@@ -1,35 +1,47 @@
-// Encoder:
+// Settings:
+// DEBUG
+#define DEBUG 1
+#define BAUD 9600
+// Low Pass Filters:
+#define FILTRER_ON 1
+#define DT 0.003
+// Pins:
+//  * Encoder Motor Esquerdo:
 #define me_encoder_A 2
 #define me_encoder_B 23
-long cont_me = 0;
-float ve = 0;
-
+//  * Encoder Motor Direito:
 #define md_encoder_A 3
 #define md_encoder_B 53
-long cont_md = 0;
-float vd = 0;
 
+// Variaveis do Encoder:
+long cont_me = 0;
+long cont_md = 0;
+// Velocidades Lineres:
+float ve = 0;
+float vd = 0;
+// Variaveis de `medirVelocidades()`:
 long tempo_0 = 0;
-float prev_ve = 0;
-float prev_vd = 0;
 float prev_cont_me = 0;
 float prev_cont_md = 0;
-float updateVelocidades() {
+#if FILTRER_ON
+    float prev_ve = 0;
+    float prev_vd = 0;
+#endif
+
+void medirVelocidades() {
     long tempo = micros();
     float dt = (tempo - tempo_0)/1.0e6;
 
-    // Filtro
-    float a = dt/(dt + 0.003);
-    ve = (cont_me - prev_cont_me)*(1-a)/dt + prev_ve*a;
-    vd = (cont_md - prev_cont_md)*(1-a)/dt + prev_vd*a;
-    prev_ve = ve;
-    prev_vd = vd;
-    // ---
-
-    // Sem Filtro
-    //ve = (cont_me - prev_cont_me)/dt + prev_ve;
-    //vd = (cont_md - prev_cont_md)/dt + prev_vd;
-    // ---
+    #if FILTRER_ON
+        float a = dt/(dt + DT);
+        ve = (cont_me - prev_cont_me)*(1-a)/dt + prev_ve*a;
+        vd = (cont_md - prev_cont_md)*(1-a)/dt + prev_vd*a;
+        prev_ve = ve;
+        prev_vd = vd;
+    #else // FILTER_OFF
+        ve = (cont_me - prev_cont_me)/dt;
+        vd = (cont_md - prev_cont_md)/dt;
+    #endif
 
     tempo_0 = tempo;
     prev_cont_me = cont_me;
@@ -46,18 +58,22 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(me_encoder_A), contadorEncoderME, RISING);
     attachInterrupt(digitalPinToInterrupt(md_encoder_A), contadorEncoderMD, RISING);
 
-    Serial.begin(9600);
-    while (!Serial);
+    #if DEBUG
+        Serial.begin(BAUD);
+        while (!Serial);
+    #endif
 }
 
 void loop() {
-    updateVelocidades();
+    medirVelocidades();
 
-    Serial.print(ve);
-    Serial.print(", ");
-    Serial.print(ve);
-    Serial.print(", ");
-    Serial.println("500, -500");
+    #if DEBUG
+        Serial.print(ve);
+        Serial.print(", ");
+        Serial.print(ve);
+        Serial.print(", ");
+        Serial.println("500, -500");
+    #endif
 }
 
 void contadorEncoderME() {
