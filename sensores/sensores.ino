@@ -9,9 +9,13 @@
 #define DELAY_CALIBRAGEM 1000 // 1 SEGUNDO
 #define MIN_OUT 0
 #define MAX_OUT 200
-// Filtro:
+// Filtro de lerSensores:
 #define FILTRO_ON true
 #define alpha 0.1
+// PID do Segue Linha:
+// nota: A variáveis: target, kp, kd e ki são ajustadas dentro da função `pid_linha()`.
+#define delta_tempo 0.01 // segundos
+#define limite_correcao 200 // graus por segundo
 
 // Pins:
 //  * Sensores Reflexivos:
@@ -108,6 +112,36 @@ int lerSensores() {
     return leitura;
 }
 
+// Variáveis de `pid_linha`:
+int prev_erro = 0;
+float iTerm = 0;
+
+/* 
+ * `pid_linha()` baseia-se no feedback da leitura dos sensores de linha para retornar
+ *   A correção tomada como uma velocidade angular por meio de um PID para ajustar
+ *   as velocidades dos motores.
+ */
+float pid_linha(int feedback) {
+    // Constantes do PID:
+    static int target = 0;
+    static int kp = 0;
+    static int kd = 0;
+    static int ki = 0;
+
+    // Cálculo dos termos do PID:
+    int erro = target - feedback;
+    float dTerm = (erro - prev_erro) / delta_tempo;
+    iTerm += erro * delta_tempo;
+    // Cálculo da correção
+    float correcao = kp * erro + kd * dTerm + ki * iTerm;
+    // Limitando correcão:
+    correcao = constrain(correcao, -limite_correcao, limite_correcao);
+    // Manutenção das variaveis.
+    prev_erro = erro;
+
+    return correcao;
+}
+
 void setup() {
     #if DEBUG
         // Inicializa o monitor serial e espera até ser conectado.
@@ -120,8 +154,12 @@ void setup() {
 
 void loop() {
     int feedback_sensores = lerSensores();
+    float correcao_omega_linha = pid_linha(feedback_sensores);
 
     #if DEBUG
-        Serial.println(feedback_sensores);
+        Serial.print(feedback_sensores);
+        Serial.print(", ");
+        Serial.print(correcao_omega_linha);
+        Serial.println(", 0");
     #endif
 }
