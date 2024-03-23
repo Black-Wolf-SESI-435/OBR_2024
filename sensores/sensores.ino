@@ -118,8 +118,8 @@ float iTerm = 0;
 
 /* 
  * `pid_linha()` baseia-se no feedback da leitura dos sensores de linha para retornar
- *   A correção tomada como uma velocidade angular por meio de um PID para ajustar
- *   as velocidades dos motores.
+ *   a correção, tomada como uma velocidade angular (graus por segundo), por meio
+ *   de um PID para ajustar as velocidades dos motores.
  */
 float pid_linha(int feedback) {
     // Constantes do PID:
