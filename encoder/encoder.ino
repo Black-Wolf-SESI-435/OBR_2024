@@ -1,10 +1,11 @@
 // Settings:
-// DEBUG
-#define DEBUG 1
+// Debug
+#define DEBUG true
 #define BAUD 9600
 // Low Pass Filters:
-#define FILTRER_ON 1
-#define DT 0.003
+#define FILTRO_ON true
+#define alpha 0.1
+
 // Pins:
 //  * Encoder Motor Esquerdo:
 #define me_encoder_A 2
@@ -19,11 +20,13 @@ long cont_md = 0;
 // Velocidades Lineres:
 float ve = 0;
 float vd = 0;
+
 // Variaveis de `medirVelocidades()`:
 long tempo_0 = 0;
 float prev_cont_me = 0;
 float prev_cont_md = 0;
-#if FILTRER_ON
+// Variáveos do low pass filter de `medirVelocidades()`
+#if FILTRO_ON
     float prev_ve = 0;
     float prev_vd = 0;
 #endif
@@ -32,15 +35,15 @@ void medirVelocidades() {
     long tempo = micros();
     float dt = (tempo - tempo_0)/1.0e6;
 
+    ve = (cont_me - prev_cont_me)/dt;
+    vd = (cont_md - prev_cont_md)/dt;
+
     #if FILTRER_ON
-        float a = dt/(dt + DT);
-        ve = (cont_me - prev_cont_me)*(1-a)/dt + prev_ve*a;
-        vd = (cont_md - prev_cont_md)*(1-a)/dt + prev_vd*a;
+        // Filtra a leitura da velocidade.
+        ve = (1 - alpha) * ve + alpha * prev_ve;
+        vd = (1 - alpha) * vd + alpha * prev_vd;
         prev_ve = ve;
         prev_vd = vd;
-    #else // FILTER_OFF
-        ve = (cont_me - prev_cont_me)/dt;
-        vd = (cont_md - prev_cont_md)/dt;
     #endif
 
     tempo_0 = tempo;
@@ -65,6 +68,7 @@ void setup() {
 }
 
 void loop() {
+    // Atualiza as variaveis de `ve` e `vd`.
     medirVelocidades();
 
     #if DEBUG
