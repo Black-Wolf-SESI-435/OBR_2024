@@ -10,6 +10,11 @@
 #define MIN_OUT 0
 #define MAX_OUT 200
 
+// Pins:
+//  * Sensores Reflexivos:
+#define se_datapin A0
+#define sd_datapin A1
+
 // Variaveis de `calibrar()`:
 int minmax_sensores[NUM_SENSORES][2] = {};
 
@@ -72,6 +77,20 @@ void calibrar() {
     #endif
 }
 
+/* `lerSensores()` retorna a leitura dos senroes, sendo um número de -400 á +400
+ * Deve ser atualizado caso o número de sensroes mude.
+ */
+int lerSensores() {
+    // Le os pinos analógicos dos sensores
+    int se_read = analogRead(A0);
+    int sd_read = analogRead(A1);
+    // Normaliza as leituras usando a calibragem
+    sd_read = map(se_read, minmax_sensores[0][0], minmax_sensores[0][1], MIN_OUT, MAX_OUT);
+    sd_read = map(sd_read, minmax_sensores[1][0], minmax_sensores[1][1], MIN_OUT, MAX_OUT);
+    // Retorna o calculo da posição relativa á linha
+    return se_read - sd_read;
+}
+
 void setup() {
     #if DEBUG
         // Inicializa o monitor serial e espera até ser conectado.
@@ -81,5 +100,11 @@ void setup() {
 
     calibrar();
 }
+
 void loop() {
+    int feedback_sensores = lerSensores();
+
+    #if DEBUG
+        Serial.println(feedback_sensores);
+    #endif
 }
