@@ -77,7 +77,8 @@ void calibrar() {
     #endif
 }
 
-/* `lerSensores()` retorna a leitura dos senroes, sendo um número de -400 á +400
+/*
+ * `lerSensores()` retorna a leitura dos senroes, sendo um número de -400 á +400
  * Deve ser atualizado caso o número de sensroes mude.
  */
 int lerSensores() {
