@@ -9,6 +9,9 @@
 #define DELAY_CALIBRAGEM 1000 // 1 SEGUNDO
 #define MIN_OUT 0
 #define MAX_OUT 200
+// Filtro:
+#define FILTRO_ON true
+#define alpha 0.1
 
 // Pins:
 //  * Sensores Reflexivos:
@@ -77,6 +80,10 @@ void calibrar() {
     #endif
 }
 
+#if FILTRO_ON // Variáveis do low pass filter de `lerSensores()`:
+    int prev_leitura = 0;
+#endif
+
 /*
  * `lerSensores()` retorna a leitura dos senroes, sendo um número de -400 á +400
  * Deve ser atualizado caso o número de sensroes mude.
@@ -89,7 +96,16 @@ int lerSensores() {
     sd_read = map(se_read, minmax_sensores[0][0], minmax_sensores[0][1], MIN_OUT, MAX_OUT);
     sd_read = map(sd_read, minmax_sensores[1][0], minmax_sensores[1][1], MIN_OUT, MAX_OUT);
     // Retorna o calculo da posição relativa á linha
-    return se_read - sd_read;
+
+    int leitura = se_read - sd_read;
+    
+    #if FILTRO_ON
+    // Low pass filter:
+    leitura = (1 - alpha) * leitura + alpha * prev_leitura;
+    prev_leitura = leitura;
+    #endif
+
+    return leitura;
 }
 
 void setup() {
