@@ -5,6 +5,10 @@
 // Low Pass Filters:
 #define FILTRO_ON true
 #define alpha 0.1
+// PIDs:
+// A variáveis que tunam o pid dos motores, como target, kp, kd, ki, etc, estão
+//   declaradas como estáticas dentro de cada função `pid_motor_*()`.
+#define velocidade_base 200 // velocidade base para o target
 
 // Pins:
 //  * Encoder Motor Esquerdo:
@@ -51,6 +55,56 @@ void medirVelocidades() {
     prev_cont_md = cont_md;
 }
 
+// Variáveis de `pid_motor_esquerdo`:
+float me_prev_erro = 0;
+float me_iTerm = 0;
+
+int pid_motor_esquerdo(float target) {
+    static float kp = 0; // graus por segundo
+    static float kd = 0; // graus por segundo
+    static float ki = 0; // graus por segundo
+    static float delta_tempo = 0.01; // segundos
+    static int limite_correcao = 255; // resolução de `analogWrite()`
+
+    // Cálculo dos termos do PID:
+    float erro = target - ve;
+    float dTerm = (erro - me_prev_erro) / delta_tempo;
+    me_iTerm += erro * delta_tempo;
+    // Cálculo da correção
+    float correcao = kp * erro + kd * dTerm + ki * me_iTerm;
+    // Limitando a correcão:
+    correcao = constrain(correcao, -limite_correcao, limite_correcao);
+    // Manutenção das variaveis.
+    me_prev_erro = erro;
+
+    return correcao;
+}
+
+// Variáveis de `pid_motor_direito`:
+float md_prev_erro = 0;
+float md_iTerm = 0;
+
+int pid_motor_direito(float target) {
+    static float kp = 0; // graus por segundo
+    static float kd = 0; // graus por segundo
+    static float ki = 0; // graus por segundo
+    static float delta_tempo = 0.01; // segundos
+    static int limite_correcao = 255; // resolução de `analogWrite()`
+
+    // Cálculo dos termos do PID:
+    float erro = target - vd;
+    float dTerm = (erro - md_prev_erro) / delta_tempo;
+    md_iTerm += erro * delta_tempo;
+    // Cálculo da correção
+    int correcao = kp * erro + kd * dTerm + ki * md_iTerm;
+    // Limitando a correcão:
+    correcao = constrain(correcao, -limite_correcao, limite_correcao);
+    // Manutenção das variaveis.
+    md_prev_erro = erro;
+
+    return correcao;
+}
+
 void setup() {
     // Input
     pinMode(me_encoder_A, INPUT);
@@ -71,12 +125,22 @@ void loop() {
     // Atualiza as variaveis de `ve` e `vd`.
     medirVelocidades();
 
+    float ve_target = velocidade_base;
+    float vd_target = velocidade_base;
+
+    int correcao_me_enable = pid_motor_esquerdo(ve_target);
+    int correcao_md_enable = pid_motor_direito(vd_target);
+
     #if DEBUG
         Serial.print(ve);
         Serial.print(", ");
-        Serial.print(ve);
+        Serial.print(ve_target);
         Serial.print(", ");
-        Serial.println("500, -500");
+        Serial.print(vd);
+        Serial.print(", ");
+        Serial.print(vd_target);
+        Serial.print(", ");
+        Serial.println(velocidade_base);
     #endif
 }
 
