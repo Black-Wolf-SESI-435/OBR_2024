@@ -11,6 +11,14 @@
 #define velocidade_base 200 // velocidade base para o target
 
 // Pins:
+//  * Ponte H: Motor Esquerdo (m2)
+#define me_enable 4     // in3
+#define me_amarelo 49   // in4
+#define me_verde 51     // enB
+//  * Ponte H: Motor Esquerdo (m1)
+#define md_enable 5     // in1
+#define md_amarelo 25   // in2
+#define md_verde 27     // enA
 //  * Encoder Motor Esquerdo:
 #define me_encoder_A 2
 #define me_encoder_B 23
@@ -24,6 +32,40 @@ long cont_md = 0;
 // Velocidades Lineres:
 float ve = 0;
 float vd = 0;
+
+/*
+ * `ligaMotores(int velME, int velMD)`, liga os motores dfinindo sua direção e
+ *   velocidade baseado em `velME` e `velMD` inteiros entre -255 e 255.
+ * É esperado que essa função seja usada com o PID das velocidades do robô, que
+ *   devem ter sua correção limitada em 255.
+*/
+void ligarMotores(int velME, int velMD) {
+    // Define a direção do motor da esquerda.
+    if (velME > 0) {
+        digitalWrite(me_amarelo, HIGH);
+        digitalWrite(me_verde, LOW);
+    } else if (velME < 0) {
+        digitalWrite(me_amarelo, LOW);
+        digitalWrite(me_verde, HIGH);
+    } else {
+        digitalWrite(me_amarelo, LOW);
+        digitalWrite(me_verde, LOW);
+    }
+    // Define a direção do motor da direita.
+    if (velMD > 0) {
+        digitalWrite(md_amarelo, HIGH);
+        digitalWrite(md_verde, LOW);
+    } else if (velMD < 0) {
+        digitalWrite(md_amarelo, LOW);
+        digitalWrite(md_verde, HIGH);
+    } else {
+        digitalWrite(md_amarelo, LOW);
+        digitalWrite(md_verde, LOW);
+    }
+    // Define as velocidades de cada motor:
+    analogWrite(me_enable, velME);
+    analogWrite(md_enable, velMD);
+}
 
 // Variaveis de `medirVelocidades()`:
 long tempo_0 = 0;
@@ -106,11 +148,25 @@ int pid_motor_direito(float target) {
 }
 
 void setup() {
-    // Input
+    // pinMode: OUTPUT
+    // Ponte H: motror esquerdo
+    pinMode(me_enable, OUTPUT);
+    pinMode(me_amarelo, OUTPUT);
+    pinMode(me_verde, OUTPUT);
+    // Ponte H: motor direito
+    pinMode(md_enable, OUTPUT);
+    pinMode(md_amarelo, OUTPUT);
+    pinMode(md_verde, OUTPUT);
+    // pinMode: INPUT
+    // Encoder: motor esquerdo
     pinMode(me_encoder_A, INPUT);
     pinMode(me_encoder_B, INPUT);
+    // Encoder: motor direito
     pinMode(md_encoder_A, INPUT);
     pinMode(md_encoder_B, INPUT);
+
+    // Inicia o programa desligando os motores.
+    ligarMotores(0, 0);
 
     attachInterrupt(digitalPinToInterrupt(me_encoder_A), contadorEncoderME, RISING);
     attachInterrupt(digitalPinToInterrupt(md_encoder_A), contadorEncoderMD, RISING);
@@ -130,6 +186,8 @@ void loop() {
 
     int correcao_me_enable = pid_motor_esquerdo(ve_target);
     int correcao_md_enable = pid_motor_direito(vd_target);
+
+    ligarMotores(correcao_me_enable, correcao_md_enable);
 
     #if DEBUG
         Serial.print(ve);
