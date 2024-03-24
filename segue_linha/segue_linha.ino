@@ -1,79 +1,78 @@
-#define sd_input A0
-#define se_input A1
+// Settings:
+// Debug:
+// Full Debug:
+#define DEBUG true // Mostra as velocidades e outras informações durante a execução
+#define BAUD 9600
+// Medindo delta_tempo:.
+#define MEDIR_DT true // Mostra o valor de delta_tempo em μs (automaticamente desabilita o DEBUG)
+// Low Pass Filters:
+#define FILTRO_ON true
+#define ALPHA 0.1
+// Constantes:
+#define delta_tempo 0.01 // tempo do ciclo do loop (segundos)
+#define VELOCIDADE_BASE 200 // velocidade padrão dos motores (graus por segundo)
 
-// Funções da ponte h
-extern void m1_ligar(int vel);
-extern void m2_ligar(int vel);
-
-int vel_e = 180;
-int vel_d = 180;
-
-int erro_0 = 0;
-unsigned long erro_total = 0;
-unsigned long tempo_0 = 0;
-unsigned long tempo = 0;
-int pid(int erro, int kp, int kd, int ki) {
-  tempo = micros();
-
-  unsigned long delta_tempo = tempo - tempo_0;
-  int delta_erro = erro - erro_0;
-
-  erro_total += erro;
-
-  int val_pid = kp*erro + kd*delta_erro/delta_tempo + ki*(erro_total)*tempo;
-
-  erro_0 = erro;
-  tempo_0 = tempo;
-  return val_pid;
-}
+extern float ve;
+extern float vd;
 
 void setup() {
-  // Coloca os pinos 9 a 13 e o 6 como OUTPUT
-  Serial.begin(9600);
+    // pinMode ponte H
+    setup_ponteH();
+    // pinMode: INPUT
+    setup_encoder();
 
-  int pins[6] = { 13, 12, 11, 10, 9, 6 };
-  for (int i = 0; i < 6; ++i)
-    pinMode(pins[i], OUTPUT);
+    // Inicia o programa desligando os motores.
+    ligarMotores(0, 0);
+    // Inicia a calibragem dos sensores.
+    calibrar();
 
-  // Liga os motores para frente
-  digitalWrite(m1_amarelo, HIGH);
-  digitalWrite(m1_verde, LOW);
-  digitalWrite(m2_amarelo, HIGH);
-  digitalWrite(m2_verde, LOW);
+    #if DEBUG || MEDINDO_DT
+        // Inicializa o monitor serial e espera até ser conectado.
+        Serial.begin(BAUD);
+        while (!Serial);
+    #endif
 }
 
+#if MEDIR_DT
+    long prev_tempo;
+#endif
 void loop() {
-  // Lê o valor dos sensores
-  int val_sd = analogRead(sd_input);
-  int val_se = analogRead(se_input);
+    // Atualiza as variaveis de `ve` e `vd`.
+    medirVelocidades();
 
-  int erro = val_se - val_sd;
-  //                 kp kd ki
-  int acc = pid(erro, 1, 3, 0);
-  unsigned long delta_tempo = tempo - tempo_0;
-  vel_e -= acc * delta_tempo;
-  vel_d += acc * delta_tempo;
+    int feedback_sensores = lerSensores();
+    float v_angular_target = pid_linha(feedback_sensores);
 
-  if (vel_e < -100)
-    vel_e = -100;
-  else (vel_e > 100)
-    vel_e = 100;
-  
-  if (vel_d < -100)
-    vel_d = -100;
-  else (vel_d > 100)
-    vel_d = 100;
+    float ve_target = VELOCIDADE_BASE - v_angular_target;
+    float vd_target = VELOCIDADE_BASE - v_angular_target;
 
-  m1_ligar(vel_e);
-  m2_ligar(vel_d);
-}
+    int correcao_me_enable = pid_motor_esquerdo(ve_target);
+    int correcao_md_enable = pid_motor_direito(vd_target);
 
-void s1_seguir(int cor) {
-  if (cor <= 80) {
-    analogWrite(m1_enable, 255);
-    analogWrite(m2_enable, 180);
-  } else if (cor >= 81) {
-    analogWrite(m1_enable, 180);
-    analogWrite(m2_enable, 255);
-  }
+    ligarMotores(correcao_me_enable, correcao_md_enable);
+    
+    #if MEDIR_DT
+        // Medida do delta_tempo:
+        long tempo = micros();
+        Serial.println(tempo - prev_tempo); // delta_tempo
+        // Manutenção das variáveis
+        prev_tempo = tempo;
+    #elif DEBUG
+        Serial.print((ve + vd) / 2.0);  // velocidade linear medida pelo encoder
+        Serial.print(", ");
+        Serial.print(ve);               // velocidade medida no motor esquerdo
+        Serial.print(", ");
+        Serial.print(ve_target);        // velocidade target no motor esquerdo
+        Serial.print(", ");
+        Serial.print(vd);               // velocidade medida no motor direito
+        Serial.print(", ");
+        Serial.print(vd_target);        // velocidade target no motor direito
+        Serial.print(", ");
+        Serial.print(VELOCIDADE_BASE);  // velocidade linear esperada
+        Serial.print(", ");
+        Serial.print(feedback_sensores);// erro medido nos sensores
+        Serial.print(", ");
+        Serial.print(v_angular_target); // velocidade angular target
+        Serial.println(", 0");
+    #endif
 }
