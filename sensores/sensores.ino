@@ -15,7 +15,7 @@
 // PID do Segue Linha:
 // nota: A variáveis: target, kp, kd e ki são ajustadas dentro da função `pid_linha()`.
 #define delta_tempo 0.01 // segundos
-#define limite_correcao 200 // graus por segundo
+#define limite_correcao 200.0 // graus por segundo
 
 // Pins:
 //  * Sensores Reflexivos:
@@ -114,7 +114,7 @@ int lerSensores() {
 
 // Variáveis de `pid_linha`:
 int prev_erro = 0;
-float iTerm = 0;
+float iTerm = 0.0;
 
 /* 
  * `pid_linha()` baseia-se no feedback da leitura dos sensores de linha para retornar
@@ -123,10 +123,10 @@ float iTerm = 0;
  */
 float pid_linha(int feedback) {
     // Constantes do PID:
-    static int target = 0;
-    static int kp = 0;
-    static int kd = 0;
-    static int ki = 0;
+    static int target = 0.0;
+    static float kp = 0.0;
+    static float kd = 0.0;
+    static float ki = 0.0;
 
     // Cálculo dos termos do PID:
     int erro = target - feedback;
