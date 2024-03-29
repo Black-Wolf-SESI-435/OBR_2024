@@ -1,6 +1,6 @@
-# Motor ev3/nxt
+# Encoder.ino
 
-## Caixa de Redução
+## Motor NXT/EV3
 
 ![gears](gears.png)
 O motor do nxt e do ev3 possuem uma caixa de redução que transformam 48 voltas do motor em 1 volta da roda.
@@ -92,7 +92,7 @@ Sempre que o encoder de um motor sair de 0v para 5v, a função `contadorEncoder
 Como explicado antes, esse contador representa a rotação em graus do motor desde o início do programa.
 O contador é uma variável do tipo `long int`, isso é, tem um limite entre $-2'147'483'648$ e $2'147'483'647$ que representa pouco menos de 6 milhões de voltas em um único sentido de rotação o que é mais que o suficiente pelas limitações do motor e o tempo máximo da prova (5 min).
 
-### Velocímetro:
+### Velocímetro
 
 ```C++
 void medirVelocidades() {
