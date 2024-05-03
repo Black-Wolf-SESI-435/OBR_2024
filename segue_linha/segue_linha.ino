@@ -1,14 +1,23 @@
-#define md_enable 13
-#define md_amarelo 12
-#define md_verde 11
+#define DEBUG 0
 
-#define me_amarelo 10
-#define me_verde 9
-#define me_enable 6
+#define md_enable 4
+#define md_amarelo 22
+#define md_verde 23
 
-#define sd_input A0
+#define me_amarelo 24
+#define me_verde 25
+#define me_enable 7
+
+#define sd2_input A0
+#define sd_input A1
 #define se_input A2
+#define se2_input A3
 
+// CALIBRAGEM
+#define CALIBRAGEM_1 200
+#define CALIBRAGEM_2 400
+#define VELOCIDADE 70
+#define VEL_AJUSTE_ME 15
 
 /* Essa função liga o motor 1 controlado pelo IN_1, IN_2, EN_A
  *
@@ -18,11 +27,11 @@
  */
 void md_ligar(int vel) {
   if (vel > 0) {
-    digitalWrite(md_amarelo, HIGH);
-    digitalWrite(md_verde, LOW);
-  } else if (vel < 0) {
     digitalWrite(md_amarelo, LOW);
     digitalWrite(md_verde, HIGH);
+  } else if (vel < 0) {
+    digitalWrite(md_amarelo, HIGH);
+    digitalWrite(md_verde, LOW);
   } else {
     digitalWrite(md_amarelo, LOW);
     digitalWrite(md_verde, LOW);
@@ -38,11 +47,11 @@ void md_ligar(int vel) {
  */
 void me_ligar(int vel) {
   if (vel > 0) {    
-    digitalWrite(me_amarelo, HIGH);
-    digitalWrite(me_verde, LOW);
-  } else if (vel < 0) {
     digitalWrite(me_amarelo, LOW);
     digitalWrite(me_verde, HIGH);
+  } else if (vel < 0) {
+    digitalWrite(me_amarelo, HIGH);
+    digitalWrite(me_verde, LOW);
   } else {
     digitalWrite(me_amarelo, LOW);
     digitalWrite(me_verde, LOW);
@@ -51,44 +60,66 @@ void me_ligar(int vel) {
 }
 
 void setup() {
-    // Coloca os pinos 9 a 13 e o 6 como OUTPUT
-    int pins[6] = {13, 12, 11, 10, 9, 6 };
-    for (int i = 0; i < 6; ++i) {
-        pinMode(pins[i], OUTPUT);
-    }
+    // Seta os pinos da ponte H como OUTPUT:
+    pinMode(md_enable, OUTPUT);
+    pinMode(md_amarelo, OUTPUT);
+    pinMode(md_verde, OUTPUT);
+    pinMode(me_enable, OUTPUT);
+    pinMode(me_amarelo, OUTPUT);
+    pinMode(me_verde, OUTPUT);
+
+#if DEBUG
+    Serial.begin(9600);
+#endif
 }
 
 void loop() {
-    int calibragem = 85;
     // Lê o valor dos sensores
-    int val_sd = analogRead(sd_input) > calibragem;
-    int val_se = analogRead(se_input) > calibragem;
-    // 13 branco 85 preto 200
+    int val_sd2 = analogRead(sd2_input);
+    int val_sd = analogRead(sd_input);
+    int val_se = analogRead(se_input);
+    int val_se2 = analogRead(se2_input);
+    // > calibragem ==> preto: True (1)
+    // < calibragem ==> branco: False (0)
 
-    if (val_se && val_sd) {
-        // preto x preto: frete
-        md_ligar(70);
-        me_ligar(70);
+#if DEBUG
+    Serial.print(val_sd2);
+    Serial.print(", ");
+    Serial.print(val_sd);
+    Serial.print(", ");
+    Serial.print(val_se);
+    Serial.print(", ");
+    Serial.println(val_se2);
+#endif
+
+    val_sd2 = val_sd2 > CALIBRAGEM_1;
+    val_sd = val_sd > CALIBRAGEM_1;
+    val_se = val_se > CALIBRAGEM_1;
+    val_se2 = val_se2 > CALIBRAGEM_2;
+
+    if (val_sd2 || val_se2) {
+        // Cruzamento
     }
-    if (val_se && !val_sd) {
-        // preto x branco: tras, 0.4s, esquerda
-        md_ligar(-60);
-        me_ligar(-60);
-        delay(400);
-        md_ligar(70);
-        me_ligar(20);
+
+    // Segue Linha
+    if (!(val_se || val_sd)) {
+        // reto
+        md_ligar(VELOCIDADE);
+        me_ligar(VELOCIDADE - VEL_AJUSTE_ME);
     }
     if (!val_se && val_sd) {
-        // branco x preto: tras, 0.4s, direita
-        md_ligar(-60);
-        me_ligar(-60);
-        delay(400);
-        md_ligar(20);
-        me_ligar(70);
+        // direita
+        md_ligar(0);
+        me_ligar(VELOCIDADE);
     }
-    if (!val_sd && !val_se) {
-        // branco x branco: frete
-        md_ligar(70);
-        me_ligar(70);
+    if (val_se && !val_sd) {
+        // esquerda
+        md_ligar(VELOCIDADE);
+        me_ligar(0);
+    }
+    if (val_se && val_sd) {
+        // para
+        md_ligar(0);
+        me_ligar(0);
     }
 }
