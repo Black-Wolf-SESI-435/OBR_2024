@@ -15,7 +15,7 @@
 
 // CALIBRAGEM
 #define CALIBRAGEM_1 200
-#define CALIBRAGEM_2 400
+#define CALIBRAGEM_2 300
 #define VELOCIDADE 70
 #define VEL_AJUSTE_ME 15
 
@@ -82,6 +82,11 @@ void loop() {
     // > calibragem ==> preto: True (1)
     // < calibragem ==> branco: False (0)
 
+    val_sd2 = val_sd2 > CALIBRAGEM_1;
+    val_sd = val_sd > CALIBRAGEM_1;
+    val_se = val_se > CALIBRAGEM_1;
+    val_se2 = val_se2 > CALIBRAGEM_2;
+
 #if DEBUG
     Serial.print(val_sd2);
     Serial.print(", ");
@@ -90,15 +95,28 @@ void loop() {
     Serial.print(val_se);
     Serial.print(", ");
     Serial.println(val_se2);
-#endif
-
-    val_sd2 = val_sd2 > CALIBRAGEM_1;
-    val_sd = val_sd > CALIBRAGEM_1;
-    val_se = val_se > CALIBRAGEM_1;
-    val_se2 = val_se2 > CALIBRAGEM_2;
+#endif    
 
     if (val_sd2 || val_se2) {
         // Cruzamento
+        if (val_se2 && !val_sd2) {
+            // Esquerda
+            // GIRA ate se estar branco
+            me_ligar(0);
+            md_ligar(VELOCIDADE+20);
+            delay(1500);
+        }
+        else if (!val_se2 && val_sd2) {
+            // Direita
+            me_ligar(VELOCIDADE - VEL_AJUSTE_ME+20);
+            md_ligar(0);
+            delay(1500);
+        }
+        else if (val_se2 && val_se2) {
+            // Frente
+        }
+        me_ligar(0);
+        md_ligar(0);
     }
 
     // Segue Linha
