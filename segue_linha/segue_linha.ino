@@ -1,4 +1,5 @@
 #define DEBUG 0
+#define CRUZAMENTO 1
 
 #define md_enable 4
 #define md_amarelo 22
@@ -88,15 +89,16 @@ void loop() {
     val_se2 = val_se2 > CALIBRAGEM_2;
 
 #if DEBUG
-    Serial.print(val_sd2);
-    Serial.print(", ");
     Serial.print(val_sd);
+    Serial.print(" : ");
+    Serial.print(val_sd > CALIBREAGEM_1);
     Serial.print(", ");
     Serial.print(val_se);
-    Serial.print(", ");
-    Serial.println(val_se2);
-#endif    
+    Serial.print(" : ");
+    Serial.println(val_se > CALIBREAGEM_1);
+#endif
 
+#if CRUZAMENTO
     if (val_sd2 || val_se2) {
         // Cruzamento
         if (val_se2 && !val_sd2) {
@@ -118,6 +120,7 @@ void loop() {
         me_ligar(0);
         md_ligar(0);
     }
+#endif
 
     // Segue Linha
     if (!(val_se || val_sd)) {
