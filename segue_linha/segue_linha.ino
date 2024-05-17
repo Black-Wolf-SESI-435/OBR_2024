@@ -76,27 +76,29 @@ void setup() {
 
 void loop() {
     // Lê o valor dos sensores
-    int val_sd2 = analogRead(sd2_input);
     int val_sd = analogRead(sd_input);
     int val_se = analogRead(se_input);
+    int val_sd2 = analogRead(sd2_input);
     int val_se2 = analogRead(se2_input);
     // > calibragem ==> preto: True (1)
     // < calibragem ==> branco: False (0)
 
-    val_sd2 = val_sd2 > CALIBRAGEM_1;
+#if DEBUG
+    Serial.print(val_se);
+    Serial.print(" e ");
+    Serial.print(val_se > CALIBRAGEM_1);
+    Serial.print(", ");
+    Serial.print(val_sd);
+    Serial.print(" d ");
+    Serial.print(val_sd > CALIBRAGEM_1);
+    Serial.print(", ");
+    Serial.println(CALIBRAGEM_1);
+#endif
+    
     val_sd = val_sd > CALIBRAGEM_1;
     val_se = val_se > CALIBRAGEM_1;
+    val_sd2 = val_sd2 > CALIBRAGEM_1;
     val_se2 = val_se2 > CALIBRAGEM_2;
-
-#if DEBUG
-    Serial.print(val_sd);
-    Serial.print(" : ");
-    Serial.print(val_sd > CALIBREAGEM_1);
-    Serial.print(", ");
-    Serial.print(val_se);
-    Serial.print(" : ");
-    Serial.println(val_se > CALIBREAGEM_1);
-#endif
 
 #if CRUZAMENTO
     if (val_sd2 || val_se2) {
