@@ -1,4 +1,6 @@
-#define DEBUG 0
+#define DEBUG 1 // coloque 1 para ver as leituras dos sensores no monitor serial.
+#define TESTE_SENSOR 1 // debug precisa estar ligado: coloque 1 para testar os sensores 0 para nn testar
+#define SEGUE_LINHA 0 // coloque 0 para desligar o segue linha e 1 para ligar
 #define CRUZAMENTO 1
 
 #define md_enable 4
@@ -9,10 +11,11 @@
 #define me_verde 25
 #define me_enable 7
 
-#define sd2_input A0
-#define sd_input A1
-#define se_input A2
+#define sd_input A0
+#define se_input A1
+#define sd2_input A2
 #define se2_input A3
+#define st_input A7
 
 // CALIBRAGEM
 #define CALIBRAGEM_1 200
@@ -80,10 +83,16 @@ void loop() {
     int val_se = analogRead(se_input);
     int val_sd2 = analogRead(sd2_input);
     int val_se2 = analogRead(se2_input);
-    // > calibragem ==> preto: True (1)
-    // < calibragem ==> branco: False (0)
 
 #if DEBUG
+#if TESTE_SENSOR
+    int val_st = analogRead(st_input);
+    Serial.print("0, 1023, ");
+    Serial.print(val_st);
+    Serial.print(" t ");
+    Serial.print(val_st > CALIBRAGEM_1);
+    Serial.print(", ");
+#endif
     Serial.print(val_se);
     Serial.print(" e ");
     Serial.print(val_se > CALIBRAGEM_1);
@@ -95,6 +104,8 @@ void loop() {
     Serial.println(CALIBRAGEM_1);
 #endif
     
+    // > calibragem ==> preto: True (1)
+    // < calibragem ==> branco: False (0)
     val_sd = val_sd > CALIBRAGEM_1;
     val_se = val_se > CALIBRAGEM_1;
     val_sd2 = val_sd2 > CALIBRAGEM_1;
@@ -124,6 +135,7 @@ void loop() {
     }
 #endif
 
+#if SEGUE_LINHA
     // Segue Linha
     if (!(val_se || val_sd)) {
         // reto
@@ -140,9 +152,5 @@ void loop() {
         md_ligar(VELOCIDADE);
         me_ligar(0);
     }
-    if (val_se && val_sd) {
-        // para
-        md_ligar(0);
-        me_ligar(0);
-    }
+#endif
 }
