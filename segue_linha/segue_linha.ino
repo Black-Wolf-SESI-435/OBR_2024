@@ -1,7 +1,7 @@
-#define DEBUG 1 // coloque 1 para ver as leituras dos sensores no monitor serial.
-#define TESTE_SENSOR 1 // debug precisa estar ligado: coloque 1 para testar os sensores 0 para nn testar
-#define SEGUE_LINHA 0 // coloque 0 para desligar o segue linha e 1 para ligar
-#define CRUZAMENTO 1
+#define DEBUG        0  // coloque 1 para ver as leituras dos sensores no monitor serial.
+#define TESTE_SENSOR 0  // debug precisa estar ligado: coloque 1 para testar os sensores 0 para nn testar
+#define SEGUE_LINHA  1  // coloque 0 para desligar o segue linha e 1 para ligar
+#define CRUZAMENTO   0  // coloque 0 para desligar e 1 para ligar as curvas fechadas (90 graus)
 
 #define md_enable 4
 #define md_amarelo 22
