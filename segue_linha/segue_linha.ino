@@ -18,9 +18,9 @@
 #define st_input A7
 
 // CALIBRAGEM
-#define CALIBRAGEM_1 200
-#define CALIBRAGEM_2 300
-#define VELOCIDADE 70
+#define CALIBRAGEM_1  200
+#define CALIBRAGEM_2  300
+#define VELOCIDADE    60
 #define VEL_AJUSTE_ME 15
 
 /* Essa função liga o motor 1 controlado pelo IN_1, IN_2, EN_A
@@ -137,20 +137,25 @@ void loop() {
 
 #if SEGUE_LINHA
     // Segue Linha
-    if (!(val_se || val_sd)) {
+    if (val_se && val_sd) {
         // reto
         md_ligar(VELOCIDADE);
         me_ligar(VELOCIDADE - VEL_AJUSTE_ME);
     }
-    if (!val_se && val_sd) {
-        // direita
-        md_ligar(0);
-        me_ligar(VELOCIDADE);
-    }
-    if (val_se && !val_sd) {
+    else if (val_se && !val_sd) {
         // esquerda
         md_ligar(VELOCIDADE);
-        me_ligar(0);
+        me_ligar(- VELOCIDADE + VEL_AJUSTE_ME);
+    }
+    else if (!val_se && val_sd) {
+        // direita
+        md_ligar(-VELOCIDADE);
+        me_ligar(VELOCIDADE - VEL_AJUSTE_ME);
+    }
+    else if (!(val_se || val_sd)) {
+        // reto
+        md_ligar(VELOCIDADE);
+        me_ligar(VELOCIDADE - VEL_AJUSTE_ME);
     }
 #endif
 }
