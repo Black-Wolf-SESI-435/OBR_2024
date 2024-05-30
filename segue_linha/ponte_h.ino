@@ -74,24 +74,3 @@ void hard_stop() {
     md_ligar(0);
     me_ligar(0);
 }
-
-void girar(int sentido) {
-    me_ligar(30);
-    md_ligar(30);
-    delay(700);
-
-    hard_stop();
-
-    if (sentido == GIRAR_DIREITA) {
-        me_ligar(30);
-        md_ligar(-30);
-    }
-    else if (sentido == GIRAR_ESQUERDA) {
-        me_ligar(-30);
-        md_ligar(30);
-    }
-    delay(1000);
-    me_ligar(0);
-    md_ligar(0);
-    delay(200);
-}

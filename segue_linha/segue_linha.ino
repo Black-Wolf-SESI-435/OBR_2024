@@ -15,7 +15,7 @@
 
 // Constantes:
 #define cruz_cal    100
-#define se_cal    400
+#define se_cal    300
 #define sd_cal    200
 
 #define VELOCIDADE_ME 30
@@ -86,22 +86,55 @@ void loop() {
 
     #if CRUZAMENTO
         if (val_see || val_sdd) {
+            // Para
             hard_stop();
-            delay(1000);
+            delay(300);
 
-            int sentido;
-            if (val_see && !val_sdd) {
-                sentido = GIRAR_ESQUERDA;
-            }
-            else if (!val_see && val_sdd) {
-                sentido = GIRAR_DIREITA;
-            }
-            else {
-                // verde
-                while (true);
-            }
+            val_see = analogRead(see_input) < cruz_cal;
+            val_sdd = analogRead(sdd_input) < cruz_cal;
 
-            girar(sentido);
+            // Avança até centralizar com a curva
+            me_ligar(30);
+            md_ligar(30);
+            delay(300);
+
+            val_sm = analogRead(sm_input) < cruz_cal;
+
+            delay(450);
+            hard_stop();
+            delay(300);
+
+            int caminho = (val_see<<2) + (val_sm<<1) + val_sdd;
+
+            switch (caminho) {
+                case 0b000:
+                    while (true);
+                    break;
+                case 0b100:
+                    me_ligar(-VELOCIDADE_ME);
+                    md_ligar(VELOCIDADE_MD);
+                    delay(1200);
+
+                    me_ligar(VELOCIDADE_ME);
+                    md_ligar(-VELOCIDADE_MD);
+                    delay(30);
+                    md_ligar(0);
+                    me_ligar(0);
+                    delay(300);
+                    break;
+                case 0b001:
+                    me_ligar(VELOCIDADE_ME);
+                    md_ligar(-VELOCIDADE_MD);
+                    delay(1200);
+
+                    me_ligar(-VELOCIDADE_ME);
+                    md_ligar(VELOCIDADE_MD);
+                    delay(30);
+                    md_ligar(0);
+                    me_ligar(0);
+                    delay(300);
+                    break;
+            }
         }
     #endif
 
