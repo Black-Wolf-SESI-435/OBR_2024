@@ -1,12 +1,15 @@
 // Pinos da ponte H
+#define me_amarelo 22
+#define me_verde 23
+#define me_enable 2
 
-#define md_enable 4
-#define md_amarelo 22
-#define md_verde 23
+#define md_enable 3
+#define md_amarelo 24
+#define md_verde 25
 
-#define me_amarelo 24
-#define me_verde 25
-#define me_enable 7
+#define GIRAR_DIREITA 0
+#define GIRAR_ESQUERDA 1
+#define NAO_GIRAR 2
 
 /* Essa função liga o motor 1 controlado pelo IN_1, IN_2, EN_A
  *
@@ -58,8 +61,37 @@ void setup_ponteh() {
     pinMode(md_verde, OUTPUT);
     pinMode(me_enable, OUTPUT);
     pinMode(me_amarelo, OUTPUT);
-    pinMode(me_verde, OUTPUT)
+    pinMode(me_verde, OUTPUT);
 
     me_ligar(0);
     md_ligar(0);
+}
+
+void hard_stop() {
+    md_ligar(-70);
+    me_ligar(-70);
+    delay(30);
+    md_ligar(0);
+    me_ligar(0);
+}
+
+void girar(int sentido) {
+    me_ligar(30);
+    md_ligar(30);
+    delay(700);
+
+    hard_stop();
+
+    if (sentido == GIRAR_DIREITA) {
+        me_ligar(30);
+        md_ligar(-30);
+    }
+    else if (sentido == GIRAR_ESQUERDA) {
+        me_ligar(-30);
+        md_ligar(30);
+    }
+    delay(1000);
+    me_ligar(0);
+    md_ligar(0);
+    delay(200);
 }
