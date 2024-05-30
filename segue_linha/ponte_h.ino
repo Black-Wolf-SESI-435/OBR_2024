@@ -1,9 +1,9 @@
 // Pinos da ponte H
+#define me_enable 4
 #define me_amarelo 22
 #define me_verde 23
-#define me_enable 2
 
-#define md_enable 3
+#define md_enable 5
 #define md_amarelo 24
 #define md_verde 25
 
