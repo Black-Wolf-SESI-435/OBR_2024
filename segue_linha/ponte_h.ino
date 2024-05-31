@@ -7,10 +7,6 @@
 #define md_amarelo 24
 #define md_verde 25
 
-#define GIRAR_DIREITA 0
-#define GIRAR_ESQUERDA 1
-#define NAO_GIRAR 2
-
 /* Essa função liga o motor 1 controlado pelo IN_1, IN_2, EN_A
  *
  * @param vel int entre -100 e 100, representa a porcentagem
@@ -67,3 +63,19 @@ void setup_ponteh() {
     md_ligar(0);
 }
 
+void girar(int direcao) {
+    switch (direcao) {
+        case GIRAR_ESQUERDA:
+            me_ligar(- VELOCIDADE_ME+10);
+            md_ligar(VELOCIDADE_MD+10);
+            break;
+        case GIRAR_DIREITA:
+            me_ligar(VELOCIDADE_ME+10);
+            md_ligar(- VELOCIDADE_MD+10);
+            break;
+        default:
+            me_ligar(0);
+            md_ligar(0);
+            break;
+    }
+}

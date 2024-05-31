@@ -24,9 +24,9 @@
 #define VELOCIDADE_MD 30
 
 // Aliases:
-#define GIRAR_DIREITA 0
-#define GIRAR_ESQUERDA 1
-#define NAO_GIRAR 2
+#define GIRAR_ESQUERDA -1
+#define NAO_GIRAR 0
+#define GIRAR_DIREITA 1
 
 long calibragem[NUM_SENSORES];
 
@@ -145,45 +145,46 @@ void loop() {
     #if CRUZAMENTO
         if (val_see || val_sdd) {
             // Para
-            hard_stop();
+            me_ligar(-70);
+            md_ligar(-70);
+            delay(30);
+            me_ligar(0);
+            md_ligar(0);
             delay(300);
 
-            val_see = analogRead(see_input) < calibragem[0];
-            val_sdd = analogRead(sdd_input) < calibragem[4];
-
             // Avança até centralizar com a curva
-            me_ligar(30);
-            md_ligar(30);
+            me_ligar(VELOCIDADE_MD);
+            md_ligar(VELOCIDADE_ME);
             delay(300);
 
             val_sm = analogRead(sm_input) < calibragem[2];
 
-            delay(450);
-            hard_stop();
+            delay(500);
+            me_ligar(-70);
+            md_ligar(-70);
+            delay(30);
+            me_ligar(0);
+            md_ligar(0);
             delay(300);
 
             int caminho = (val_see<<2) + (val_sm<<1) + val_sdd;
 
             switch (caminho) {
                 case 0b100:
-                    me_ligar(-VELOCIDADE_ME);
-                    md_ligar(VELOCIDADE_MD);
-                    delay(1200);
+                    girar(GIRAR_ESQUERDA);
+                    delay(1000);
 
-                    me_ligar(VELOCIDADE_ME);
-                    md_ligar(-VELOCIDADE_MD);
+                    girar(GIRAR_DIREITA);
                     delay(30);
                     md_ligar(0);
                     me_ligar(0);
                     delay(300);
                     break;
                 case 0b001:
-                    me_ligar(VELOCIDADE_ME);
-                    md_ligar(-VELOCIDADE_MD);
-                    delay(1200);
+                    girar(GIRAR_DIREITA);
+                    delay(1000);
 
-                    me_ligar(-VELOCIDADE_ME);
-                    md_ligar(VELOCIDADE_MD);
+                    girar(GIRAR_ESQUERDA);
                     delay(30);
                     md_ligar(0);
                     me_ligar(0);
@@ -202,13 +203,11 @@ void loop() {
         }
         else if (val_se && !val_sd) {
             // esquerda
-            md_ligar(VELOCIDADE_MD);
-            me_ligar(- VELOCIDADE_ME);
+            girar(GIRAR_ESQUERDA);
         }
         else if (!val_se && val_sd) {
             // direita
-            md_ligar(- VELOCIDADE_MD);
-            me_ligar(VELOCIDADE_ME);
+            girar(GIRAR_DIREITA);
         }
         else if (!(val_se || val_sd)) {
             // reto
