@@ -1,5 +1,5 @@
 // Configurações de Execução:
-#define DEBUG        0  // coloque 1 para ver as leituras dos sensores no monitor serial.
+#define DEBUG        1  // coloque 1 para ver as leituras dos sensores no monitor serial.
 #define SEGUE_LINHA  1  // coloque 0 para desligar o segue linha e 1 para ligar
 #define CRUZAMENTO   1  // coloque 0 para desligar e 1 para ligar as curvas fechadas (90 graus)
 
@@ -14,15 +14,10 @@
 #define sd_vcc 53
 #define botao_calibragem 7
 
-
 // Calibragem:
 #define DELAY_CALIBRAGEM 1000
 #define NUM_SENSORES 5
 #define NUM_TESTES 512
-
-#define cruz_cal  100
-#define se_cal    300
-#define sd_cal    200
 
 // Velocidades:
 #define VELOCIDADE_ME 30
@@ -153,15 +148,15 @@ void loop() {
             hard_stop();
             delay(300);
 
-            val_see = analogRead(see_input) < cruz_cal;
-            val_sdd = analogRead(sdd_input) < cruz_cal;
+            val_see = analogRead(see_input) < calibragem[0];
+            val_sdd = analogRead(sdd_input) < calibragem[4];
 
             // Avança até centralizar com a curva
             me_ligar(30);
             md_ligar(30);
             delay(300);
 
-            val_sm = analogRead(sm_input) < cruz_cal;
+            val_sm = analogRead(sm_input) < calibragem[2];
 
             delay(450);
             hard_stop();

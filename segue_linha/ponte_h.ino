@@ -67,10 +67,3 @@ void setup_ponteh() {
     md_ligar(0);
 }
 
-void hard_stop() {
-    md_ligar(-70);
-    me_ligar(-70);
-    delay(30);
-    md_ligar(0);
-    me_ligar(0);
-}
