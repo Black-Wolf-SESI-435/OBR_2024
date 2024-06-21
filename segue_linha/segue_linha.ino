@@ -4,15 +4,16 @@
 #define CRUZAMENTO   1  // coloque 0 para desligar e 1 para ligar as curvas fechadas (90 graus)
 
 // Pinos dos Sensores:
-#define see_input A0 // s1
-#define se_input  A1 // analogico E
-#define sm_input  A2 // s3
-#define sd_input  A3 // analogico D
-#define sdd_input A4 // s5
+#define see_input A0 // s1 (marrom)
+#define se_input  A1 // analogico E (amarelo)
+#define sm_input  A2 // s3 (verde)
+#define sd_input  A3 // analogico D (azul)
+#define sdd_input A4 // s5 (roxo)
 
-#define se_vcc 52
-#define sd_vcc 53
-#define botao_calibragem 7
+#define se_vcc 13
+#define sd_vcc 12
+#define sazul_gnd 11
+#define botao_calibragem 10
 
 // Calibragem:
 #define DELAY_CALIBRAGEM 1000
@@ -90,11 +91,13 @@ void setup() {
 
     pinMode(se_vcc, OUTPUT);
     pinMode(sd_vcc, OUTPUT);
+    pinMode(sazul_gnd, OUTPUT);
 
     pinMode(botao_calibragem, INPUT_PULLUP);
 
     digitalWrite(se_vcc, HIGH);
     digitalWrite(sd_vcc, HIGH);
+    digitalWrite(sazul_gnd, LOW);
 
     calibrar();
 }

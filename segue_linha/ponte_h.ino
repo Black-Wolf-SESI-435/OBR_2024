@@ -1,11 +1,11 @@
 // Pinos da ponte H
-#define me_enable 4
-#define me_amarelo 22
-#define me_verde 23
+#define me_verde 2
+#define me_amarelo 3
+#define me_enable 6
 
-#define md_enable 5
-#define md_amarelo 24
-#define md_verde 25
+#define md_verde 4
+#define md_amarelo 5
+#define md_enable 9
 
 /* Essa função liga o motor 1 controlado pelo IN_1, IN_2, EN_A
  *
