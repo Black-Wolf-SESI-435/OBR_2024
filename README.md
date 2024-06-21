@@ -11,3 +11,14 @@ Código e projeto do robô do SESI-435 de Votuporanga
 - [ ] Aperfeiçoar segue linha
 - [ ] Sensor ultrassônico
 - [ ] Desviar da caixa
+
+## Fios:
+
+Analógico:
+
+|pino|cor|
+A0: marrom (sensores)
+A1: amarelo (sensores)
+A2: verde (sensores)
+A3: azul (sensores)
+A4: roxo (sensores)
