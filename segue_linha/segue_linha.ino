@@ -1,5 +1,5 @@
 // Configurações de Execução:
-#define DEBUG        1  // coloque 1 para ver as leituras dos sensores no monitor serial.
+#define DEBUG        0  // coloque 1 para ver as leituras dos sensores no monitor serial.
 #define SEGUE_LINHA  1  // coloque 0 para desligar o segue linha e 1 para ligar
 #define CRUZAMENTO   1  // coloque 0 para desligar e 1 para ligar as curvas fechadas (90 graus)
 
@@ -21,8 +21,8 @@
 #define NUM_TESTES 512
 
 // Velocidades:
-#define VELOCIDADE_ME 30
-#define VELOCIDADE_MD 30
+#define VELOCIDADE_ME 35
+#define VELOCIDADE_MD 35
 
 // Aliases:
 #define GIRAR_ESQUERDA -1

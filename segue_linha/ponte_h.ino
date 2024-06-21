@@ -66,12 +66,12 @@ void setup_ponteh() {
 void girar(int direcao) {
     switch (direcao) {
         case GIRAR_ESQUERDA:
-            me_ligar(- VELOCIDADE_ME+10);
-            md_ligar(VELOCIDADE_MD+10);
+            me_ligar(- VELOCIDADE_ME);
+            md_ligar(VELOCIDADE_MD);
             break;
         case GIRAR_DIREITA:
-            me_ligar(VELOCIDADE_ME+10);
-            md_ligar(- VELOCIDADE_MD+10);
+            me_ligar(VELOCIDADE_ME);
+            md_ligar(- VELOCIDADE_MD);
             break;
         default:
             me_ligar(0);
